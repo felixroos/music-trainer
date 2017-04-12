@@ -78,8 +78,11 @@ export class NotationComponent implements OnInit, AfterViewChecked {
     this.notationAsSVG = this.notationService.renderNotation();
   }
 
-  useKeySignature(keySignature?) {
+  useKeySignature(keySignature?, render?) {
     this.notationService.keySignature = keySignature;
+    if (render) {
+      this.notationAsSVG = this.notationService.renderNotation();
+    }
   }
 
   getKeySignature() {

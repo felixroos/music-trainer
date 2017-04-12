@@ -35,6 +35,8 @@ export class AppComponent {
   private delayMs = 1000;
 
   @ViewChild(NotationComponent) notation: NotationComponent;
+  private signature: any;
+  private signs: Array<string> = ['f', 's'];
 
   constructor(private pianoService: PianoService, private trumpetService: TrumpetService,
     private soundService: SoundService,
@@ -94,8 +96,6 @@ export class AppComponent {
 
     if (this.quizService.next()) {
       this.currentTestNote = this.pianoService.getNote(this.quizService.getCurrentNoteId(), this.notation.getKeySignature());
-      console.log('next quiz note', this.currentTestNote);
-      console.log('level', this.quizService.level);
       if (this.quizService.level !== 'Special') {
         this.notation.addNote(this.currentTestNote);
       }
@@ -122,19 +122,62 @@ export class AppComponent {
     this.quizStatus = QuizStatus.Starting;
   }
 
+  private randomSignature(maxAccidentals: number = 3) {
+    return Math.round(Math.random() * maxAccidentals) + this.signs[Math.round(Math.random())]
+  }
+
+  private nextSignature(current: string, circular: boolean = false, reverse: boolean = false) {
+    let number = parseInt(current[0]);
+    let sign = current[1];
+    const s = ['f', 's'];
+    if (reverse) {
+      s.reverse();
+    }
+
+    if (!circular && number === 6) {
+      sign = sign === s[0] ? s[1] : s[0]; //flip sign
+      number = -1;
+    } else if (circular && number === 6 && sign === s[0]) {
+      sign = s[1];
+      number = 6;
+    } else if (circular && number === 0 && sign === s[1]) {
+      sign = s[0];
+      number = 0;
+    }
+    if (!circular || sign === s[0]) {
+      number += 1;
+    } else if (sign === s[1]) {
+      number -= 1;
+    }
+    return number.toString() + sign;
+  }
+
   private startQuiz(level: string, signature?: string, loop?: boolean) {
+
+    /*//testing nextSignature
+     let s = '0s';
+     setInterval(() => {
+     s = this.nextSignature(s, true,true);
+     this.notation.useKeySignature(s, true);
+     }, 200);*/
+
+    signature = signature || this.randomSignature();
     this.quizService.startQuiz(this.quizLength, level, loop);
     this.quizStatus = QuizStatus.InProgress;
     this.quizCorrect = this.quizService.correct;
     this.quizIncorrect = this.quizService.incorrect;
+    const maxLoops = 0;
     if (level !== 'Special') {
       this.notation.addNote(this.currentTestNote);
     } else {
-      const maxAccidentals = 3;
-      const signs = ['f', 's'];
-      // signature = "6f";
-      signature = signature || Math.round(Math.random() * maxAccidentals) + signs[Math.round(Math.random())];
-      this.notation.useKeySignature(signature);
+      if (!loop || !this.signature) {
+        this.signature = { value: signature, loops: 0 };
+      } else if (this.signature.loops >= maxLoops) {
+        this.signature = { value: this.nextSignature(this.signature.value), loops: 0 };
+      }
+      this.signature.loops += 1;
+
+      this.notation.useKeySignature(this.signature.value);
       this.notation.addNotes(this.quizService.getNotes().map((note) => {
         return this.pianoService.getNote(note);
       }));

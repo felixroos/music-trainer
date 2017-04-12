@@ -1,0 +1,62 @@
+<div class="header-secondary">Quiz</div>
+<div class="content">
+  <div *ngIf="status == QuizStatus.Starting">
+    <div class="row">
+      <span>Select level:</span>
+      <select #level class="dropdown">
+        <option value="Special">Trumpet</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <span>Select Key Signature:</span>
+      <select #signature class="dropdown">
+        <option value="">Random</option>
+        <option value="0f">C</option>
+        <option value="1s">G</option>
+        <option value="2s">D</option>
+        <option value="3s">A</option>
+        <option value="4s">E</option>
+        <option value="5s">B</option>
+        <option value="6s">F#</option>
+        <option value="1f">F</option>
+        <option value="2f">Bb</option>
+        <option value="3f">Eb</option>
+        <option value="4f">Ab</option>
+        <option value="5f">Db</option>
+        <option value="6f">Gb</option>
+      </select>
+    </div>
+    <div class="row">
+      <button id="start-btn" class="btn btn-secondary"
+              (click)="handleStartBtnClick(level.value,signature.value)">
+        Start
+      </button>
+    </div>
+  </div>
+  <div *ngIf="status == QuizStatus.InProgress">
+    <div class="row">
+      <span>Press the correct key on the piano.</span>
+    </div>
+    <div class="row">
+      <span class="score-label">Score</span><span class="score correct">{{ correct }}</span><span
+        class="score incorrect">{{ incorrect }}</span>
+    </div>
+    <div class="row">
+      <span>{{ message }}</span>
+    </div>
+  </div>
+  <div *ngIf="status == QuizStatus.Finished">
+    <div class="row">
+      <span>Your score: </span><span><b>{{ correct }}</b> out of {{ total }}</span>
+    </div>
+    <div class="row">
+      <span>{{ description }}</span>
+    </div>
+    <div class="row">
+      <button id="tryagain-btn" class="btn btn-secondary" (click)="handleTryAgainBtnClick()">Try
+        Again?
+      </button>
+    </div>
+  </div>
+</div>
